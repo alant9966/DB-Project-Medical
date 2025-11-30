@@ -142,7 +142,7 @@ VALUES
 (10, '1993-11-09', 'Shauna', 'Fletcher', 166, 64, 31, '4554 Stratford Drive, Honolulu, HI 96814');
 
 -- Populate the BloodTest table
-INSERT INTO bloodtest(bloodtest_id,patient_id,time,result)
+INSERT INTO bloodtest(bloodtest_id, patient_id, time, result)
 VALUE
 (1, 1, '08:30:00', 'Normal hemoglobin and glucose levels'),
 (2, 2, '09:15:00', 'Slightly elevated cholesterol; HDL within range'),

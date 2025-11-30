@@ -124,11 +124,57 @@ body {
 }
 
 /* Upcoming Appointments */
+.appointments {
+    margin-bottom: 30px;
+}
+
+.appointments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.search-container {
+    position: relative;
+    display: inline-block;
+}
+
+.search-input {
+    padding: 8px 35px 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 0.9em;
+    width: 300px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #1f7aec;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+}
+
 .appointments-list {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 10px 20px;
+}
+
+.appointments-list p {
+    color: #555;
+    padding: 20px 0;
+    margin: 0;
+    text-align: center;
 }
 
 .appointment-item {

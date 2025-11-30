@@ -50,8 +50,17 @@ function saveData(inputElement) {
     const infoRow = inputElement.closest('.info-row');
     const editableValue = inputElement.closest('.edit-value');
     
-    const newValue = inputElement.value;
+    let newValue = inputElement.value;
     const fieldName = editableValue.dataset.field;
+    
+    // Convert MM-DD-YYYY format to YYYY-MM-DD for date fields
+    if (fieldName === 'date_of_birth' || fieldName === 'date_of_expiry') {
+        newValue = convertDateFormat(newValue);
+        if (!newValue) {
+            alert('Invalid date format. Please use MM-DD-YYYY format (e.g., 12-25-1990).');
+            return;
+        }
+    }
     
     // Determine if this is a patient or doctor page
     const patientId = infoRow.dataset.patientId;
@@ -108,4 +117,37 @@ function saveData(inputElement) {
         console.error('Network error:', error);
         alert('A network error occurred. Please try again.');
     });
+}
+
+// Convert date from MM-DD-YYYY to YYYY-MM-DD format
+function convertDateFormat(dateString) {
+    if (!dateString || dateString.trim() === '') {
+        return null;
+    }
+    
+    // Check if already in YYYY-MM-DD format
+    const yyyyMMddPattern = /^\d{4}-\d{2}-\d{2}$/;
+    if (yyyyMMddPattern.test(dateString.trim())) {
+        return dateString.trim();
+    }
+    
+    // Try to parse MM-DD-YYYY format
+    const mmddyyyyPattern = /^(\d{1,2})-(\d{1,2})-(\d{4})$/;
+    const match = dateString.trim().match(mmddyyyyPattern);
+    
+    if (match) {
+        const month = match[1].padStart(2, '0');
+        const day = match[2].padStart(2, '0');
+        const year = match[3];
+        
+        // Validate the date
+        const date = new Date(`${year}-${month}-${day}`);
+        if (date.getFullYear() == year && 
+            (date.getMonth() + 1) == parseInt(month) && 
+            date.getDate() == parseInt(day)) {
+            return `${year}-${month}-${day}`;
+        }
+    }
+    
+    return null;
 }

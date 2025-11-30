@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, abort, redirect, url_for, jso
 from flask_mysqldb import MySQL
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import pymysql.cursors
 import config
 
@@ -73,7 +73,7 @@ def load_user(user_id):
 # User Registration (Patient)
 @app.route('/register-patient', methods=['GET', 'POST'])
 def register_patient():
-    if request.method == 'POST':
+    if (request.method == 'POST'):
         # Retrieve registration form data
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
@@ -125,6 +125,16 @@ def register_patient():
                                    WHERE patient_id = %s
                                 """, (new_user_id, patient['patient_id']))
                     
+                    # Create insurance entry for the patient
+                    cur.execute("""INSERT INTO insurance (patient_id)
+                                   VALUES (%s)
+                                """, (patient['patient_id'],))
+                    
+                    # Create medical record entry for the patient
+                    cur.execute("""INSERT INTO medicalrecord (patient_id)
+                                   VALUES (%s)
+                                """, (patient['patient_id'],))
+                    
                     flash('Account registered! Please log in.', 'success')
                     
             # If the patient does not yet exist...
@@ -140,6 +150,17 @@ def register_patient():
                                    last_name, date_of_birth, address)
                                VALUES (%s, %s, %s, %s, %s)
                             """, (new_user_id, first_name, last_name, dob, address))
+                new_patient_id = cur.lastrowid
+                
+                # Create insurance entry for the patient
+                cur.execute("""INSERT INTO insurance (patient_id)
+                               VALUES (%s)
+                            """, (new_patient_id,))
+                
+                # Create medical record entry for the patient
+                cur.execute("""INSERT INTO medicalrecord (patient_id)
+                               VALUES (%s)
+                            """, (new_patient_id,))
                 
                 flash('Account registered! Please log in.', 'success')
 
@@ -160,7 +181,7 @@ def register_patient():
 # User Registration (Doctor)
 @app.route('/register-doctor', methods=['GET', 'POST'])
 def register_doctor():
-    if request.method == 'POST':
+    if (request.method == 'POST'):
         # Retrieve registration form data
         first_name = request.form.get('doctor_firstname')
         last_name = request.form.get('doctor_lastname')
@@ -256,7 +277,7 @@ def login():
         elif (current_user.role == 'doctor'):
             return redirect(url_for('doctor_home'))
     
-    if request.method == 'POST':
+    if (request.method == 'POST'):
         email = request.form.get('email')
         password = request.form.get('password')
 
@@ -307,19 +328,116 @@ def patient_home():
     
     # Retrieve data using the user's ID
     cur = mysql.connection.cursor()
-    cur.execute("""SELECT p.*, i.*
-                   FROM patient p
-                   LEFT JOIN insurance i
-                   ON p.patient_id = i.patient_id
-                   WHERE p.user_id = %s""", (current_user.id,))
-    patient_data = cur.fetchone()
-    cur.close()
+    try:
+        cur.execute("""SELECT p.*, i.*
+                       FROM patient p
+                       LEFT JOIN insurance i
+                       ON p.patient_id = i.patient_id
+                       WHERE p.user_id = %s""", (current_user.id,))
+        patient_data = cur.fetchone()
+        
+        # Check that the patient exists
+        if (not patient_data):
+            abort(404)
+        
+        patient_id = patient_data['patient_id']
+        
+        # Fetch upcoming appointments in the next 7 days
+        today = datetime.now().date()
+        seven_days_later = today + timedelta(days=7)
+        
+        cur.execute("""SELECT a.appointment_id, a.appointment_date, a.appointment_time, 
+                              a.description, d.doctor_firstname, d.doctor_lastname, r.room_id
+                       FROM appointment a
+                       LEFT JOIN doctor d ON a.doctor_id = d.doctor_id
+                       LEFT JOIN room r ON a.room_id = r.room_id
+                       WHERE a.patient_id = %s
+                           AND a.appointment_date >= %s
+                           AND a.appointment_date <= %s
+                       ORDER BY a.appointment_date ASC, a.appointment_time ASC
+                    """, (patient_id, today, seven_days_later))
+        upcoming_appointments = cur.fetchall()
+        
+    except Exception as e:
+        flash(f'An error occurred: {e}', 'error')
+        upcoming_appointments = []
     
-    # Check that the patient exists
-    if (not patient_data):
-        abort(404)
+    finally:
+        cur.close()
 
-    return render_template('patient/home.html', patient=patient_data)
+    return render_template('patient/home.html', patient=patient_data, appointments=upcoming_appointments)
+
+
+@app.route('/patient/search-appointments', methods=['POST'])
+@login_required
+def search_appointments():
+    # Check that the user is a patient
+    if (current_user.role != 'patient'):
+        abort(403)
+    
+    data = request.json
+    search_query = data.get('query', '').strip()
+    
+    cur = mysql.connection.cursor()
+    try:
+        # Get patient_id for the logged-in user
+        cur.execute("""SELECT patient_id
+                       FROM patient
+                       WHERE user_id = %s
+                    """, (current_user.id,))
+        patient = cur.fetchone()
+        
+        if (not patient):
+            abort(404)
+        
+        patient_id = patient['patient_id']
+        
+        # Calculate date range (next 7 days)
+        today = datetime.now().date()
+        seven_days_later = today + timedelta(days=7)
+        
+        if (search_query):
+            # Call the stored procedure
+            cur.execute("""CALL search_appointment(%s, %s, %s, %s)""", 
+                       (patient_id, today, seven_days_later, search_query))
+            results = cur.fetchall()
+        else:
+            # If no query, return all appointments in next 7 days
+            cur.execute("""SELECT a.appointment_id, a.appointment_date, a.appointment_time, 
+                                  a.description, d.doctor_firstname, d.doctor_lastname, r.room_id
+                           FROM appointment a
+                           LEFT JOIN doctor d ON a.doctor_id = d.doctor_id
+                           LEFT JOIN room r ON a.room_id = r.room_id
+                           WHERE a.patient_id = %s
+                               AND a.appointment_date >= %s
+                               AND a.appointment_date <= %s
+                           ORDER BY a.appointment_date ASC, a.appointment_time ASC
+                        """, (patient_id, today, seven_days_later))
+            results = cur.fetchall()
+        
+        # Format the results for JSON response
+        appointments = []
+        for row in results:
+            appointments.append({
+                'appointment_id': row.get('appointment_id'),
+                'appointment_date': row.get('appointment_date').strftime('%Y-%m-%d') if row.get('appointment_date') else None,
+                'appointment_time': str(row.get('appointment_time')) if row.get('appointment_time') else None,
+                'description': row.get('description') or 'No description',
+                'doctor_firstname': row.get('doctor_firstname', ''),
+                'doctor_lastname': row.get('doctor_lastname', ''),
+                'room_id': row.get('room_id')
+            })
+        
+        return jsonify({
+            "success": True,
+            "appointments": appointments
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+    
+    finally:
+        cur.close()
 
 
 @app.route('/patient/update', methods=['POST'])
@@ -347,18 +465,81 @@ def update_patient_info():
         if (str(patient_db_id) != str(patient_id)):
             return jsonify({"success": False, "message": "Authorization error."}), 403
 
+        # Initialize response value
+        response_value = new_value
+        
         # Update the Patient table
         if (update_field in ALLOWED_PATIENT_FIELDS):
+            # Handle date format conversion for date_of_birth
+            if (update_field == 'date_of_birth'):
+                # Try to parse and convert date formats
+                try:
+                    # Check if it's already in YYYY-MM-DD format
+                    if (len(new_value) == 10 and new_value.count('-') == 2):
+                        parts = new_value.split('-')
+                        if (len(parts[0]) == 4):  # YYYY-MM-DD format
+                            formatted_date = new_value
+                        else:  # MM-DD-YYYY format
+                            month, day, year = parts
+                            formatted_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+                    else:
+                        return jsonify({"success": False, "message": "Invalid date format. Use MM-DD-YYYY or YYYY-MM-DD."}), 400
+                    
+                    # Validate the date
+                    datetime.strptime(formatted_date, '%Y-%m-%d')
+                    new_value = formatted_date
+                    
+                except ValueError:
+                    return jsonify({"success": False, "message": "Invalid date. Please use MM-DD-YYYY or YYYY-MM-DD format."}), 400
+            
             cur.execute(f"""UPDATE patient 
                             SET `{update_field}` = %s 
                             WHERE patient_id = %s
                         """, (new_value, patient_db_id))
+            
+            # Format the response value for date_of_birth
+            if (update_field == 'date_of_birth' and new_value):
+                try:
+                    date_obj = datetime.strptime(new_value, '%Y-%m-%d').date()
+                    response_value = date_obj.strftime('%m-%d-%Y')
+                except:
+                    response_value = new_value
+                    
         # (Or) Update the Insurance table
-        elif update_field in ALLOWED_INSURANCE_FIELDS:
+        elif (update_field in ALLOWED_INSURANCE_FIELDS):
+            # Handle date format conversion for date_of_expiry
+            if (update_field == 'date_of_expiry' and new_value):
+                try:
+                    # Check if it's already in YYYY-MM-DD format
+                    if (len(new_value) == 10 and new_value.count('-') == 2):
+                        parts = new_value.split('-')
+                        if (len(parts[0]) == 4):  # YYYY-MM-DD format
+                            formatted_date = new_value
+                        else:  # MM-DD-YYYY format
+                            month, day, year = parts
+                            formatted_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+                    else:
+                        return jsonify({"success": False, "message": "Invalid date format. Use MM-DD-YYYY or YYYY-MM-DD."}), 400
+                    
+                    # Validate the date
+                    datetime.strptime(formatted_date, '%Y-%m-%d')
+                    new_value = formatted_date
+                    
+                except ValueError:
+                    return jsonify({"success": False, "message": "Invalid date. Please use MM-DD-YYYY or YYYY-MM-DD format."}), 400
+            
             cur.execute(f"""UPDATE insurance 
                             SET `{update_field}` = %s 
                             WHERE patient_id = %s
                         """, (new_value, patient_db_id))
+            
+            # Format the response value for date_of_expiry
+            if (update_field == 'date_of_expiry' and new_value):
+                try:
+                    date_obj = datetime.strptime(new_value, '%Y-%m-%d').date()
+                    response_value = date_obj.strftime('%m-%d-%Y')
+                except:
+                    response_value = new_value
         else:
             return jsonify({"success": False, "message": "Invalid field."}), 400
         
@@ -367,7 +548,7 @@ def update_patient_info():
         return jsonify({
             "success": True, 
             "message": "Update successful", 
-            "new_value": new_value
+            "new_value": response_value
         })
         
     except Exception as e:
@@ -541,7 +722,7 @@ def doctor_appointments(appointment_id=None):
                                   a.duration_minutes as duration
                            FROM appointment a
                            WHERE a.appointment_id = %s
-                             AND a.doctor_id = %s
+                               AND a.doctor_id = %s
                         """, (appointment_id, doctor_id))
             selected_appointment = cur.fetchone()
             
@@ -562,7 +743,7 @@ def doctor_appointments(appointment_id=None):
                        FROM appointment a
                        LEFT JOIN patient p ON a.patient_id = p.patient_id
                        WHERE a.doctor_id = %s
-                         AND a.appointment_date = %s
+                           AND a.appointment_date = %s
                        ORDER BY a.appointment_time ASC
                     """, (doctor_id, selected_date))
         appointments = cur.fetchall()
@@ -637,9 +818,9 @@ def patient_treatments(prescription_id=None):
                                   p.paid
                            FROM prescription p
                            JOIN treatment t ON p.treatment_name = t.treatment_name 
-                                           AND p.duration_days = t.duration_days
+                               AND p.duration_days = t.duration_days
                            WHERE p.prescription_id = %s
-                             AND p.patient_id = %s
+                               AND p.patient_id = %s
                         """, (prescription_id, patient_id))
             treatment = cur.fetchone()
             
@@ -657,7 +838,7 @@ def patient_treatments(prescription_id=None):
                                   p.paid
                            FROM prescription p
                            JOIN treatment t ON p.treatment_name = t.treatment_name 
-                                           AND p.duration_days = t.duration_days
+                               AND p.duration_days = t.duration_days
                            WHERE p.patient_id = %s
                            ORDER BY p.prescribed_on DESC, p.prescription_id DESC
                            LIMIT 1
@@ -675,7 +856,7 @@ def patient_treatments(prescription_id=None):
                               p.paid
                        FROM prescription p
                        JOIN treatment t ON p.treatment_name = t.treatment_name 
-                                       AND p.duration_days = t.duration_days
+                           AND p.duration_days = t.duration_days
                        WHERE p.patient_id = %s
                        ORDER BY p.prescribed_on DESC, p.prescription_id DESC
                     """, (patient_id,))
@@ -722,7 +903,7 @@ def patient_pay_bill(prescription_id):
                               t.bill
                        FROM prescription p
                        JOIN treatment t ON p.treatment_name = t.treatment_name 
-                                       AND p.duration_days = t.duration_days
+                           AND p.duration_days = t.duration_days
                        WHERE p.prescription_id = %s
                          AND p.patient_id = %s
                     """, (prescription_id, patient_id))
@@ -792,7 +973,7 @@ def patient_medical_record():
                                   result
                            FROM medicalrecord
                            WHERE patient_id = %s
-                             AND (diagnosis LIKE %s OR result LIKE %s)
+                               AND (diagnosis LIKE %s OR result LIKE %s)
                            ORDER BY medicalrecord_id DESC
                         """, (patient_id, f'%{search_query}%', f'%{search_query}%'))
         else:
@@ -808,7 +989,7 @@ def patient_medical_record():
         
         medical_records = cur.fetchall()
         
-        # Get the most recent medical record for display
+        # Retrieve the most recent medical record for display
         medical_record = medical_records[0] if medical_records else None
         
     except Exception as e:

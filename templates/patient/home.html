@@ -95,9 +95,17 @@
                 </div>
             </section>
 
-            {# <section class="appointments">
-                <h2>Upcoming Appointments</h2>
-                <div class="appointments-list">
+            <section class="appointments">
+                <div class="appointments-header">
+                    <h2>Upcoming Appointments</h2>
+                    <div class="search-container">
+                        <input type="text" id="appointment-search" class="search-input" 
+                               placeholder="Search appointments..." 
+                               autocomplete="off">
+                        <i class="fa-solid fa-search search-icon"></i>
+                    </div>
+                </div>
+                <div class="appointments-list" id="appointments-list">
                     {% if appointments %}
                         {% for appt in appointments %}
                             <div class="appointment-item">
@@ -106,7 +114,7 @@
                                 </div>
                                 <div class="appointment-details">
                                     <span class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</span>
-                                    <span class="description">{{ appt.description }}</span>
+                                    <span class="description">{{ appt.description or 'No description' }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -114,7 +122,7 @@
                         <p>You have no appointments scheduled for the next 7 days.</p>
                     {% endif %}
                 </div>
-            </section> #}
+            </section>
 
             <section class="insurance-info">
                 <h2>Your Insurance</h2>
@@ -123,21 +131,39 @@
                     <div class="info-row" data-patient-id="{{ patient.patient_id }}">
                         <div>
                             <div class="label">Insurance Carrier</div>
-                            <div class="value">{{ patient.company }}</div>
+                            <div class="edit-value" data-field="company">
+                                <span class="display-value">
+                                    {{ patient.company or '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ patient.company or '' }}" style="display: none;">
+                            </div>
                         </div>
                         <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
                     </div>
                     <div class="info-row" data-patient-id="{{ patient.patient_id }}">
                         <div>
                             <div class="label">Member ID</div>
-                            <div class="value">{{ patient.insurance_id }}</div>
+                            <div class="edit-value" data-field="insurance_id">
+                                <span class="display-value">
+                                    {{ patient.insurance_id or '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ patient.insurance_id or '' }}" style="display: none;">
+                            </div>
                         </div>
                         <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
                     </div>
                     <div class="info-row" data-patient-id="{{ patient.patient_id }}">
                         <div>
                             <div class="label">Expiration Date</div>
-                            <div class="value">{{ patient.date_of_expiry }}</div>
+                            <div class="edit-value" data-field="date_of_expiry">
+                                <span class="display-value">
+                                    {{ patient.date_of_expiry.strftime('%m-%d-%Y') if patient.date_of_expiry else '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ patient.date_of_expiry.strftime('%m-%d-%Y') if patient.date_of_expiry else '' }}" style="display: none;">
+                            </div>
                         </div>
                         <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
                     </div>
@@ -146,5 +172,6 @@
         </main>
     </div>
     <script src="{{ url_for('static', filename='js/update_button.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/patient/appointment_search.js') }}"></script>
 </body>
 </html>
