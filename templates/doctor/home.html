@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Homepage</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/doctor/home.css') }}">
+    <script src="https://kit.fontawesome.com/12ffe3020f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header-bar">
+        <div class="header-left">
+            <div class="logo">Company Logo</div>
+        </div>
+        <a class="logout-button" href="{{ url_for('logout') }}">Log Out</a>
+    </header>
+
+    <div class="homepage-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href={{ url_for('doctor_home') }}>
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href={{ url_for('doctor_appointments') }}>
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Welcome, {{ doctor.doctor_firstname }}!</h1>
+            <section class="profile-info">
+                <div class="info-card">
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Full Name</div>
+                            <div class="edit-value" data-field="full_name">
+                                <div class="display-value">
+                                    {{ doctor.doctor_firstname+' '+doctor.doctor_lastname or '' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Account ID</div>
+                            <div class="display-value">{{ doctor.doctor_id }}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Address</div>
+                            <div class="edit-value" data-field="doctor_address">
+                                <span class="display-value">
+                                    {{ doctor.doctor_address or '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ doctor.doctor_address }}" style="display: none;">
+                            </div>
+                        </div>
+                        <a href={{ url_for('update_doctor_info') }} class="update-link">Update</a>
+                    </div>
+
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Years of Experience</div>
+                            <div class="edit-value" data-field="years_of_experience">
+                                <span class="display-value">
+                                    {{ doctor.years_of_experience or '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ doctor.years_of_experience }}" style="display: none;">
+                            </div>
+                        </div>
+                        <a href={{ url_for('update_doctor_info') }} class="update-link">Update</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="department-info" data-doctor-id="{{ doctor.doctor_id }}">
+                <h2>Department</h2>
+                <div class="info-card">
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Department ID</div>
+                            <div class="display-value">{{ doctor.department_id }}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Department Name</div>
+                            <div class="display-value">{{ doctor.department_name }}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row" data-doctor-id="{{ doctor.doctor_id }}">
+                        <div>
+                            <div class="label">Office Location</div>
+                            <div class="display-value">{{ doctor.officelocation }}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/update_button.js') }}"></script>
+</body>
+</html>

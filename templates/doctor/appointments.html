@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Appointments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/doctor/appointments.css') }}">
+    <script src="https://kit.fontawesome.com/12ffe3020f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header-bar">
+        <div class="header-left">
+            <div class="logo">Company Logo</div>
+        </div>
+        <a class="logout-button" href="{{ url_for('logout') }}">Log Out</a>
+    </header>
+
+    <div class="homepage-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href={{ url_for('doctor_home') }}>
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href={{ url_for('doctor_appointments') }} class="active">
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <!-- PAGE TITLE -->
+            <h1 class="page-title">Appointment</h1>
+            <div class="section-divider"></div>
+            <div class="appointment-container">
+                <!-- LEFT COLUMN: DATE + APPOINTMENT LIST -->
+                <div class="time-list-box">
+                    <!-- Date Selector -->
+                    <div class="date-box">
+                        <form method="GET">
+                            <input type="date" name="date" value="{{ selected_date }}" class="date-input">
+                        </form>
+                    </div>
+
+                    <!-- Scrollable Appointment List -->
+                    <div class="time-list">
+                        {% for appt in appointments %}
+                        <div class="time-item {% if appt.id == selected_appointment.id %}selected{% endif %}">
+                            <a href="/doctor/appointment/{{ appt.id }}">
+                                {{ appt.time }}
+                                <span>{{ appt.patient_name }}</span>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="info-panels">
+                    <!-- Appointment Information -->
+                    <div class="panel">
+                        <h2>Appointment</h2>
+
+                        <div class="info-row">
+                            <label>Appointment_ID</label>
+                            <div class="value">{{ selected_appointment.id }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Patient_ID</label>
+                            <div class="value link">
+                                <a href="/doctor/patient/{{ selected_appointment.patient_id }}">
+                                    {{ selected_appointment.patient_id }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Doctor_ID</label>
+                            <div class="value">{{ selected_appointment.doctor_id }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Room_ID</label>
+                            <div class="value link">
+                                <a href="/doctor/room/{{ selected_appointment.room_id }}">
+                                    {{ selected_appointment.room_id }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Date</label>
+                            <div class="value">{{ selected_appointment.date }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Description</label>
+                            <div class="value">{{ selected_appointment.description }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Duration</label>
+                            <div class="value">{{ selected_appointment.duration }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Patient Information -->
+                    {% if patient %}
+                    <div class="panel">
+                        <h2>Patient Information</h2>
+
+                        <div class="info-row">
+                            <label>Patient_ID</label>
+                            <div class="value">{{ patient.id }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>First Name</label>
+                            <div class="value">{{ patient.first_name }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Last Name</label>
+                            <div class="value">{{ patient.last_name }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Date_of_birth</label>
+                            <div class="value">{{ patient.dob }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Weight</label>
+                            <div class="value">{{ patient.weight }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Height</label>
+                            <div class="value">{{ patient.height }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Age</label>
+                            <div class="value">{{ patient.age }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Address</label>
+                            <div class="value">{{ patient.address }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

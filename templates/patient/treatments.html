@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Treatments</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/patient/treatments.css') }}">
+    <script src="https://kit.fontawesome.com/12ffe3020f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header-bar">
+        <div class="header-left">
+            <div class="logo">Company Logo</div>
+        </div>
+        <a class="logout-button" href="{{ url_for('logout') }}">Log Out</a>
+    </header>
+
+    <div class="homepage-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('patient_home') }}">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('patient_appointments') }}">
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('patient_treatments') }}" class="active">
+                            <i class="fa-solid fa-kit-medical"></i>
+                            <span>Treatments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('patient_medical_record') }}">
+                            <i class="fa-solid fa-clipboard-user"></i>
+                            <span>Medical Record</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Treatments</h1>
+            <div class="divider-line"></div>
+
+            {% if treatment %}
+            <section class="treatment-section">
+                <div class="info-card">
+                    <div class="info-row">
+                        <div class="label">Treatment Name</div>
+                        <div class="value">
+                            {{ treatment.name }}
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Duration</div>
+                        <div class="value">
+                            {{ treatment.duration }}
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Description</div>
+                        <div class="value">
+                            {{ treatment.description }}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bill-section">
+                <div class="bill-title">Bill</div>
+                <div class="bill-card">
+                    <div class="bill-row">
+                        <div class="bill-label">Total:</div>
+                        <div class="bill-amount" id="bill-amount">
+                            ${{ treatment.total_amount }}
+                        </div>
+                        <div class="bill-actions">
+                            {% if treatment.total_amount > 0 %}
+                            <form method="post" id="pay-bill-form" action="{{ url_for('patient_pay_bill', prescription_id=treatment.id) }}">
+                                <button type="submit" class="btn-pay" id="pay-button">Pay</button>
+                            </form>
+                            {% else %}
+                            <span class="paid-badge">Paid</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% else %}
+            <section class="treatment-section">
+                <div class="info-card">
+                    <div class="info-row">
+                        <div class="value">No treatment information available.</div>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('pay-bill-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const button = document.getElementById('pay-button');
+            const billAmount = document.getElementById('bill-amount');
+            const formData = new FormData(form);
+            
+            // Disable button during request
+            button.disabled = true;
+            button.textContent = 'Processing...';
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update bill amount
+                    billAmount.textContent = '$0.00';
+                    
+                    // Hide pay button and show paid badge
+                    form.style.display = 'none';
+                    const paidBadge = document.createElement('span');
+                    paidBadge.className = 'paid-badge';
+                    paidBadge.textContent = 'Paid';
+                    form.parentElement.appendChild(paidBadge);
+                    
+                    // Show success message
+                    alert('Bill paid successfully!');
+                } else {
+                    alert('Error: ' + data.message);
+                    button.disabled = false;
+                    button.textContent = 'Pay';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the payment. Please try again.');
+                button.disabled = false;
+                button.textContent = 'Pay';
+            });
+        });
+    </script>
+</body>
+</html>

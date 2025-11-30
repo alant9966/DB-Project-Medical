@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Medical Record</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/patient/medical_record.css') }}">
+    <script src="https://kit.fontawesome.com/12ffe3020f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header-bar">
+        <div class="header-left">
+            <div class="logo">Company Logo</div>
+        </div>
+        <a class="logout-button" href="{{ url_for('logout') }}">Log Out</a>
+    </header>
+
+    <div class="homepage-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('patient_home') }}">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('patient_appointments') }}">
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('patient_treatments') }}">
+                            <i class="fa-solid fa-kit-medical"></i>
+                            <span>Treatments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('patient_medical_record') }}" class="active">
+                            <i class="fa-solid fa-clipboard-user"></i>
+                            <span>Medical Record</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Medical Record</h1>
+
+                <form class="record-search-form" method="get" action="{{ url_for('patient_medical_record') }}">
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Search medical record">
+                </form>
+            </div>
+
+            <div class="divider-line"></div>
+
+            <section class="medical-record-section">
+                <div class="info-card">
+                    <div class="info-row">
+                        <div class="label">Medical Record ID</div>
+                        <div class="value">{{ medical_record.record_id }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Account ID</div>
+                        <div class="value">{{ medical_record.account_id }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Diagnoses</div>
+                        <div class="value">{{ medical_record.diagnoses }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Result</div>
+                        <div class="value">{{ medical_record.result }}</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

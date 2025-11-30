@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Registration</title>
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/patient/register.css') }}"> -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .registration-container {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #222;
+            font-size: 1.8em;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .alert-error {
+            background-color: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #fcc;
+        }
+
+        .alert-success {
+            background-color: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #cfc;
+        }
+
+        .alert-warning {
+            background-color: #ffe;
+            color: #cc3;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ffc;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        h4 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        h4:first-of-type {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 1em;
+            font-family: sans-serif;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #1f7aec;
+            box-shadow: 0 0 0 2px rgba(31, 122, 236, 0.1);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 25px 0;
+        }
+
+        button[type="submit"] {
+            background-color: #1f7aec;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1561c0;
+        }
+
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-link a {
+            color: #1f7aec;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <h2>Register a Patient Account</h2>
+        <p>
+            If you are an existing patient, please enter your details exactly
+            as they appear in our records.
+        </p>
+        <p>
+            If you are a new patient, your information will be used to create
+            a new profile.
+        </p>
+
+        <!-- Display flashed messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/register-patient">
+            <h4>Your Information</h4>
+            
+            <label>First Name:</label>
+            <input type="text" name="first_name" required>
+            
+            <label>Last Name:</label>
+            <input type="text" name="last_name" required>
+            
+            <label>Date of Birth (YYYY-MM-DD):</label>
+            <input type="date" name="date_of_birth" required>
+
+            <label>Address:</label>
+            <input type="text" name="address">
+
+            <hr>
+
+            <h4>Login Details</h4>
+            
+            <label>Email:</label>
+            <input type="email" name="email" required>
+            
+            <label>Password:</label>
+            <input type="password" name="password" required>
+            
+            <button type="submit">Register</button>
+        </form>
+        <div class="back-link">
+            <a href="{{ url_for('login') }}">Back to Login</a>
+        </div>
+    </div>
+</body>
+</html>

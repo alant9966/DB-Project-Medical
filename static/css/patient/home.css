@@ -1,0 +1,173 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f4f7f6;
+}
+
+.homepage-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Header Bar */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: sans-serif;
+}
+
+.header-bar .header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-bar .logo {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.header-bar .logout-button {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: none;
+    background-color: #1f7aec;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.header-bar .logout-button:hover {
+    background-color: #1561c0;
+}
+
+/* Sidebar (Navigation) */
+.sidebar {
+    width: 240px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav li {
+    margin-bottom: 20px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.1em;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.sidebar-nav a:hover {
+    background-color: #f0f4f8;
+}
+
+.sidebar-nav a i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Patient Information */
+.main-content {
+    flex-grow: 1;
+    padding: 20px 40px;
+}
+
+.info-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.info-card .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.info-card .info-row:last-child {
+    border-bottom: none;
+}
+
+.info-card .label {
+    color: #555;
+    font-weight: bold;
+}
+
+.info-card .value {
+    color: #222;
+}
+
+.info-card .update-link {
+    font-size: 0.9em;
+}
+
+/* Upcoming Appointments */
+.appointments-list {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 20px;
+}
+
+.appointment-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.appointment-item:last-child {
+    border-bottom: none;
+}
+
+.appointment-item .appointment-date {
+    flex-basis: 180px;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.appointment-item .appointment-details {
+    flex-grow: 1;
+}
+
+.appointment-item .appointment-details .time {
+    font-weight: bold;
+    color: #000;
+    margin-right: 15px;
+}
+
+.appointment-item .appointment-details .description {
+    color: #555;
+}
+
+h1 { 
+    font-size: 2em;
+    margin-top: 0;
+}
+
+h2 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}

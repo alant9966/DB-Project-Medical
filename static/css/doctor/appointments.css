@@ -1,0 +1,201 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f4f7f6;
+}
+
+.homepage-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Header Bar */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: sans-serif;
+}
+
+.header-bar .header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-bar .logo {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.header-bar .logout-button {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: none;
+    background-color: #1f7aec;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.header-bar .logout-button:hover {
+    background-color: #1561c0;
+}
+
+/* Sidebar (Navigation) */
+.sidebar {
+    width: 240px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav li {
+    margin-bottom: 20px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.1em;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.sidebar-nav a:hover {
+    background-color: #f0f4f8;
+}
+
+.sidebar-nav a i {
+    width: 20px;
+    text-align: center;
+}
+
+
+h1 { 
+    font-size: 2em;
+    margin-top: 0;
+}
+
+h2 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+ .page-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 25px;
+}
+
+.section-divider {
+    height: 2px;
+    width: 100%;
+    background: #ccc;
+    margin-bottom: 25px;
+}
+
+.appointment-container {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+}
+
+/* Left Side */
+.time-list-box {
+    width: 300px;
+}
+
+.date-input {
+    width: 140px;
+    padding: 8px;
+    font-size: 16px;
+    border: 2px solid black;
+    background: white;
+    cursor: pointer;
+}
+
+.time-list {
+    border: 2px solid black;
+    height: 420px;
+    overflow-y: auto;
+    background: white;
+}
+
+.time-item {
+    padding: 12px 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.time-item a {
+    text-decoration: none;
+    color: black;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.time-item:hover {
+    background: #eee;
+}
+
+.time-item.selected {
+    background: #7da3ff;
+    color: white;
+}
+
+.time-item.selected a {
+    color: white;
+}
+
+/* Right Side Panels */
+.info-panels {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.panel h2 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+}
+
+.info-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.info-row label {
+    width: 160px;
+    font-weight: bold;
+}
+
+.value {
+    flex-grow: 1;
+}
+
+.value.link a {
+    color: #0057e0;
+    text-decoration: none;
+}
+
+.value.link a:hover {
+    text-decoration: underline;
+}

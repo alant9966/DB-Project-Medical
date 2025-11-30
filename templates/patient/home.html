@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Homepage</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/patient/home.css') }}">
+    <script src="https://kit.fontawesome.com/12ffe3020f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header-bar">
+        <div class="header-left">
+            <div class="logo">Company Logo</div>
+        </div>
+        <a class="logout-button" href="{{ url_for('logout') }}">Log Out</a>
+    </header>
+
+    <div class="homepage-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href={{ url_for('patient_home') }}>
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href={{ url_for('patient_appointments') }}>
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href={{ url_for('patient_treatments') }}>
+                            <i class="fa-solid fa-kit-medical"></i>
+                            <span>Treatments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href={{ url_for('patient_medical_record') }}>
+                            <i class="fa-solid fa-clipboard-user"></i>
+                            <span>Medical Record<span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Welcome, {{ patient.first_name }}!</h1>
+            <section class="profile-info">
+                <div class="info-card">
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Full Name</div>
+                            <div class="edit-value" data-field="full_name">
+                                <div class="display-value">
+                                    {{ patient.first_name+' '+patient.last_name or '' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Account ID</div>
+                            <div class="display-value">{{ patient.patient_id }}</div>
+                        </div>
+                    </div>
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Address</div>
+                            <div class="edit-value" data-field="address">
+                                <span class="display-value">
+                                    {{ patient.address or '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ patient.address }}" style="display: none;">
+                            </div>
+                        </div>
+                        <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
+                    </div>
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Date of Birth</div>
+                            <div class="edit-value" data-field="date_of_birth">
+                                <span class="display-value">
+                                    {{ patient.date_of_birth.strftime('%m-%d-%Y') or '' }}
+                                </span>
+                                <input type="text" class="edit-input" 
+                                    value="{{ patient.date_of_birth.strftime('%m-%d-%Y') }}" style="display: none;">
+                            </div>
+                        </div>
+                        <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
+                    </div>
+                </div>
+            </section>
+
+            {# <section class="appointments">
+                <h2>Upcoming Appointments</h2>
+                <div class="appointments-list">
+                    {% if appointments %}
+                        {% for appt in appointments %}
+                            <div class="appointment-item">
+                                <div class="appointment-date">
+                                    <strong>{{ appt.appointment_date.strftime('%A, %b %d') }}</strong>
+                                </div>
+                                <div class="appointment-details">
+                                    <span class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</span>
+                                    <span class="description">{{ appt.description }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>You have no appointments scheduled for the next 7 days.</p>
+                    {% endif %}
+                </div>
+            </section> #}
+
+            <section class="insurance-info">
+                <h2>Your Insurance</h2>
+                <p>Please update your insurance information immediately if any change occurs.</p>
+                <div class="info-card">
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Insurance Carrier</div>
+                            <div class="value">{{ patient.company }}</div>
+                        </div>
+                        <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
+                    </div>
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Member ID</div>
+                            <div class="value">{{ patient.insurance_id }}</div>
+                        </div>
+                        <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
+                    </div>
+                    <div class="info-row" data-patient-id="{{ patient.patient_id }}">
+                        <div>
+                            <div class="label">Expiration Date</div>
+                            <div class="value">{{ patient.date_of_expiry }}</div>
+                        </div>
+                        <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/update_button.js') }}"></script>
+</body>
+</html>
