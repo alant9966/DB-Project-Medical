@@ -80,11 +80,22 @@ body {
     background-color: #f0f4f8;
 }
 
+.sidebar-nav a.active {
+    background-color: #f0f4f8;
+    color: #1f7aec;
+    font-weight: 600;
+}
+
 .sidebar-nav a i {
     width: 20px;
     text-align: center;
 }
 
+.main {
+    flex-grow: 1;
+    padding: 20px 40px;
+    max-width: 1400px;
+}
 
 h1 { 
     font-size: 2em;
@@ -117,50 +128,121 @@ h2 {
 
 /* Left Side */
 .time-list-box {
-    width: 300px;
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.date-box {
+    margin-bottom: 15px;
 }
 
 .date-input {
-    width: 140px;
-    padding: 8px;
-    font-size: 16px;
-    border: 2px solid black;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
     background: white;
     cursor: pointer;
+    transition: border-color 0.2s ease;
+    font-family: inherit;
+}
+
+.date-input:hover {
+    border-color: #1f7aec;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #1f7aec;
+    box-shadow: 0 0 0 3px rgba(31, 122, 236, 0.1);
 }
 
 .time-list {
-    border: 2px solid black;
-    height: 420px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    height: 500px;
     overflow-y: auto;
-    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom scrollbar */
+.time-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.time-list::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.time-list::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.time-list::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
 }
 
 .time-item {
-    padding: 12px 10px;
+    padding: 16px 18px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
 }
 
-.time-item a {
-    text-decoration: none;
-    color: black;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+.time-item:last-child {
+    border-bottom: none;
 }
 
 .time-item:hover {
-    background: #eee;
+    background-color: #f9fafb;
 }
 
 .time-item.selected {
-    background: #7da3ff;
+    background-color: #1f7aec;
     color: white;
 }
 
-.time-item.selected a {
+.time-item.selected:hover {
+    background-color: #1561c0;
+}
+
+.appointment-time {
+    font-weight: 600;
+    font-size: 15px;
+    color: #333;
+}
+
+.time-item.selected .appointment-time {
     color: white;
+}
+
+.appointment-patient {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: right;
+}
+
+.time-item.selected .appointment-patient {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Empty state */
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
 }
 
 /* Right Side Panels */
@@ -168,34 +250,57 @@ h2 {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 30px;
+}
+
+.panel {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .panel h2 {
-    font-size: 1.3em;
-    margin-bottom: 15px;
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e0e0e0;
+    color: #333;
 }
 
 .info-row {
     display: flex;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: flex-start;
+}
+
+.info-row:last-child {
+    border-bottom: none;
 }
 
 .info-row label {
-    width: 160px;
-    font-weight: bold;
+    width: 180px;
+    font-weight: 600;
+    color: #555;
+    flex-shrink: 0;
 }
 
 .value {
     flex-grow: 1;
+    color: #222;
+    word-break: break-word;
 }
 
 .value.link a {
-    color: #0057e0;
+    color: #1f7aec;
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .value.link a:hover {
+    color: #1561c0;
     text-decoration: underline;
 }

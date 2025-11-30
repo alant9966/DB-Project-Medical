@@ -36,130 +36,141 @@
 
         <main class="main">
             <!-- PAGE TITLE -->
-            <h1 class="page-title">Appointment</h1>
+            <h1 class="page-title">Appointments</h1>
             <div class="section-divider"></div>
             <div class="appointment-container">
                 <!-- LEFT COLUMN: DATE + APPOINTMENT LIST -->
                 <div class="time-list-box">
                     <!-- Date Selector -->
                     <div class="date-box">
-                        <form method="GET">
-                            <input type="date" name="date" value="{{ selected_date }}" class="date-input">
+                        <form method="GET" id="date-form">
+                            <input type="date"
+                                   name="date"
+                                   value="{{ selected_date }}"
+                                   class="date-input"
+                                   id="date-input"
+                                   onchange="document.getElementById('date-form').submit();">
                         </form>
                     </div>
 
                     <!-- Scrollable Appointment List -->
-                    <div class="time-list">
-                        {% for appt in appointments %}
-                        <div class="time-item {% if appt.id == selected_appointment.id %}selected{% endif %}">
-                            <a href="/doctor/appointment/{{ appt.id }}">
-                                {{ appt.time }}
-                                <span>{{ appt.patient_name }}</span>
-                            </a>
-                        </div>
-                        {% endfor %}
+                    <div class="time-list" id="appointment-list">
+                        {% if appointments %}
+                            {% for appt in appointments %}
+                            <div class="time-item {% if selected_appointment and appt.id == selected_appointment.id %}selected{% endif %}" 
+                                 data-appointment-id="{{ appt.id }}"
+                                 onclick="selectAppointment({{ appt.id }})">
+                                <div class="appointment-time">{{ appt.time }}</div>
+                                <div class="appointment-patient">{{ appt.patient_name }}</div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>No appointments scheduled for this date.</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- RIGHT COLUMN -->
-                <div class="info-panels">
+                <div class="info-panels" id="info-panels">
                     <!-- Appointment Information -->
-                    <div class="panel">
-                        <h2>Appointment</h2>
+                    <div class="panel" id="appointment-panel" {% if not selected_appointment %}style="display: none;"{% endif %}>
+                        <h2>Appointment Details</h2>
 
                         <div class="info-row">
-                            <label>Appointment_ID</label>
-                            <div class="value">{{ selected_appointment.id }}</div>
-                        </div>
-
-                        <div class="info-row">
-                            <label>Patient_ID</label>
-                            <div class="value link">
-                                <a href="/doctor/patient/{{ selected_appointment.patient_id }}">
-                                    {{ selected_appointment.patient_id }}
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="info-row">
-                            <label>Doctor_ID</label>
-                            <div class="value">{{ selected_appointment.doctor_id }}</div>
-                        </div>
-
-                        <div class="info-row">
-                            <label>Room_ID</label>
-                            <div class="value link">
-                                <a href="/doctor/room/{{ selected_appointment.room_id }}">
-                                    {{ selected_appointment.room_id }}
-                                </a>
+                            <label>Room</label>
+                            <div class="value" id="appointment-room-id">
+                                {% if selected_appointment %}{{ selected_appointment.room_id }}{% else %}-{% endif %}
                             </div>
                         </div>
 
                         <div class="info-row">
                             <label>Date</label>
-                            <div class="value">{{ selected_appointment.date }}</div>
+                            <div class="value" id="appointment-date">
+                                {% if selected_appointment %}{{ selected_appointment.date }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Description</label>
-                            <div class="value">{{ selected_appointment.description }}</div>
+                            <div class="value" id="appointment-description">
+                                {% if selected_appointment %}{{ selected_appointment.description or '-' }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Duration</label>
-                            <div class="value">{{ selected_appointment.duration }}</div>
+                            <div class="value" id="appointment-duration">
+                                {% if selected_appointment %}{{ selected_appointment.duration }} minutes{% else %}-{% endif %}
+                            </div>
                         </div>
                     </div>
 
                     <!-- Patient Information -->
-                    {% if patient %}
-                    <div class="panel">
+                    <div class="panel" id="patient-panel" {% if not patient %}style="display: none;"{% endif %}>
                         <h2>Patient Information</h2>
 
                         <div class="info-row">
-                            <label>Patient_ID</label>
-                            <div class="value">{{ patient.id }}</div>
+                            <label>Patient ID</label>
+                            <div class="value" id="patient-id">
+                                {% if patient %}{{ patient.id }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>First Name</label>
-                            <div class="value">{{ patient.first_name }}</div>
+                            <div class="value" id="patient-first-name">
+                                {% if patient %}{{ patient.first_name }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Last Name</label>
-                            <div class="value">{{ patient.last_name }}</div>
+                            <div class="value" id="patient-last-name">
+                                {% if patient %}{{ patient.last_name }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
-                            <label>Date_of_birth</label>
-                            <div class="value">{{ patient.dob }}</div>
+                            <label>Date of Birth</label>
+                            <div class="value" id="patient-dob">
+                                {% if patient %}{{ patient.dob }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Weight</label>
-                            <div class="value">{{ patient.weight }}</div>
+                            <div class="value" id="patient-weight">
+                                {% if patient %}{{ patient.weight }} lb{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Height</label>
-                            <div class="value">{{ patient.height }}</div>
+                            <div class="value" id="patient-height">
+                                {% if patient %}{{ patient.height }} in{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Age</label>
-                            <div class="value">{{ patient.age }}</div>
+                            <div class="value" id="patient-age">
+                                {% if patient %}{{ patient.age }}{% else %}-{% endif %}
+                            </div>
                         </div>
 
                         <div class="info-row">
                             <label>Address</label>
-                            <div class="value">{{ patient.address }}</div>
+                            <div class="value" id="patient-address">
+                                {% if patient %}{{ patient.address }}{% else %}-{% endif %}
+                            </div>
                         </div>
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </main>
     </div>
+    <script src="{{ url_for('static', filename='js/doctor/appointments.js') }}"></script>
 </body>
 </html>

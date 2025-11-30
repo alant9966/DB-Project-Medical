@@ -778,6 +778,99 @@ def doctor_appointments(appointment_id=None):
                          selected_appointment=selected_appointment,
                          patient=patient)
 
+
+# Route to fetch appointment and patient details
+@app.route('/doctor/appointments/<int:appointment_id>/details', methods=['GET'])
+@login_required
+def get_appointment_details(appointment_id):
+    # Check that the user is a doctor
+    if (current_user.role != 'doctor'):
+        abort(403)
+    
+    cur = mysql.connection.cursor()
+    try:
+        # Get doctor_id for the logged-in user
+        cur.execute("""SELECT doctor_id
+                       FROM doctor
+                       WHERE user_id = %s
+                    """, (current_user.id,))
+        doctor = cur.fetchone()
+        
+        if (not doctor):
+            return jsonify({"success": False, "message": "Doctor not found."}), 404
+        
+        doctor_id = doctor['doctor_id']
+        
+        # Fetch appointment details
+        cur.execute("""SELECT a.appointment_id as id,
+                              a.appointment_time as time,
+                              a.patient_id,
+                              a.doctor_id,
+                              a.room_id,
+                              a.appointment_date as date,
+                              a.description,
+                              a.duration_minutes as duration
+                       FROM appointment a
+                       WHERE a.appointment_id = %s
+                           AND a.doctor_id = %s
+                    """, (appointment_id, doctor_id))
+        appointment = cur.fetchone()
+        
+        if (not appointment):
+            return jsonify({"success": False, "message": "Appointment not found."}), 404
+        
+        # Fetch patient information
+        cur.execute("""SELECT patient_id as id,
+                              first_name,
+                              last_name,
+                              date_of_birth as dob,
+                              weight_lb as weight,
+                              height_in as height,
+                              age,
+                              address
+                       FROM patient
+                       WHERE patient_id = %s
+                    """, (appointment['patient_id'],))
+        patient = cur.fetchone()
+        
+        # Format the response
+        appointment_data = {
+            'id': appointment['id'],
+            'time': str(appointment['time']) if appointment['time'] else None,
+            'patient_id': appointment['patient_id'],
+            'doctor_id': appointment['doctor_id'],
+            'room_id': appointment['room_id'],
+            'date': appointment['date'].strftime('%Y-%m-%d') if appointment['date'] else None,
+            'description': appointment['description'],
+            'duration': appointment['duration']
+        }
+        
+        patient_data = None
+        if (patient):
+            patient_data = {
+                'id': patient['id'],
+                'first_name': patient['first_name'],
+                'last_name': patient['last_name'],
+                'dob': patient['dob'].strftime('%Y-%m-%d') if patient['dob'] else None,
+                'weight': patient['weight'],
+                'height': patient['height'],
+                'age': patient['age'],
+                'address': patient['address']
+            }
+        
+        return jsonify({
+            "success": True,
+            "appointment": appointment_data,
+            "patient": patient_data
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+    
+    finally:
+        cur.close()
+
+
 # Route for Patient Treatments
 @app.route('/patient/treatments')
 @app.route('/patient/treatments/<int:prescription_id>')
