@@ -10,7 +10,7 @@ import os
 # Use environment variables for sensitive data (recommended)
 MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
 MYSQL_USER = os.environ.get('MYSQL_USER', 'medical_app_user')  # Changed from 'root'
-MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', 'secure_app_password_2024')  # Use strong password
+MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', 'secure_app_password_2025')  # Use strong password
 MYSQL_DB = os.environ.get('MYSQL_DB', 'medical_db')
 
 MYSQL_CURSORCLASS = 'DictCursor'
