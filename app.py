@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, abort, redirect, url_for, jso
 from flask_mysqldb import MySQL
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time as dt_time
 import pymysql.cursors
 import config
 
@@ -359,13 +359,31 @@ def patient_home():
                            AND a.appointment_date <= %s
                        ORDER BY a.appointment_date ASC, a.appointment_time ASC
                     """, (patient_id, today, seven_days_later))
-        upcoming_appointments = cur.fetchall()
+        appointments_raw = cur.fetchall()
+        
+        # Convert timedelta objects to time objects for appointment_time
+        upcoming_appointments = []
+        for appt in appointments_raw:
+            if (hasattr(appt, 'keys')):
+                appt_dict = dict(appt)
+            else:
+                appt_dict = appt
+            
+            if (appt_dict.get('appointment_time')):
+                appt_time = appt_dict['appointment_time']
+                if (isinstance(appt_time, timedelta)):
+                    # Convert timedelta to time
+                    total_seconds = int(appt_time.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    appt_dict['appointment_time'] = dt_time(hours, minutes, seconds)
+            
+            upcoming_appointments.append(appt_dict)
         
     except Exception as e:
         mysql.connection.rollback()
         flash(f'An error occurred: {e}', 'error')
-        if (not patient_data):
-            abort(500)
         upcoming_appointments = []
     
     finally:
