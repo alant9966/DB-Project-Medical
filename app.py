@@ -328,6 +328,9 @@ def patient_home():
     
     # Retrieve data using the user's ID
     cur = mysql.connection.cursor()
+    patient_data = None
+    upcoming_appointments = []
+    
     try:
         cur.execute("""SELECT p.*, i.*
                        FROM patient p
@@ -359,7 +362,10 @@ def patient_home():
         upcoming_appointments = cur.fetchall()
         
     except Exception as e:
+        mysql.connection.rollback()
         flash(f'An error occurred: {e}', 'error')
+        if (not patient_data):
+            abort(500)
         upcoming_appointments = []
     
     finally:

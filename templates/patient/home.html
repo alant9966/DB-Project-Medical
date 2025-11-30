@@ -110,10 +110,10 @@
                         {% for appt in appointments %}
                             <div class="appointment-item">
                                 <div class="appointment-date">
-                                    <strong>{{ appt.appointment_date.strftime('%A, %b %d') }}</strong>
+                                    <strong>{% if appt.appointment_date %}{{ appt.appointment_date.strftime('%A, %b %d') }}{% else %}Date TBD{% endif %}</strong>
                                 </div>
                                 <div class="appointment-details">
-                                    <span class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</span>
+                                    <span class="time">{% if appt.appointment_time %}{{ appt.appointment_time.strftime('%I:%M %p') }}{% else %}Time TBD{% endif %}</span>
                                     <span class="description">{{ appt.description or 'No description' }}</span>
                                 </div>
                             </div>
