@@ -494,34 +494,19 @@ def update_patient_info():
         
         # Update the Patient table
         if (update_field in ALLOWED_PATIENT_FIELDS):
-            # Handle date format conversion for date_of_birth
+            # Validate date_of_birth (YYYY-MM-DD)
             if (update_field == 'date_of_birth'):
-                # Try to parse and convert date formats
                 try:
-                    # Check if it's already in YYYY-MM-DD format
-                    if (len(new_value) == 10 and new_value.count('-') == 2):
-                        parts = new_value.split('-')
-                        if (len(parts[0]) == 4):  # YYYY-MM-DD format
-                            formatted_date = new_value
-                        else:  # MM-DD-YYYY format
-                            month, day, year = parts
-                            formatted_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-                    else:
-                        return jsonify({"success": False, "message": "Invalid date format. Use MM-DD-YYYY or YYYY-MM-DD."}), 400
-                    
-                    # Validate the date
-                    datetime.strptime(formatted_date, '%Y-%m-%d')
-                    new_value = formatted_date
-                    
+                    datetime.strptime(new_value, '%Y-%m-%d')
                 except ValueError:
-                    return jsonify({"success": False, "message": "Invalid date. Please use MM-DD-YYYY or YYYY-MM-DD format."}), 400
+                    return jsonify({"success": False, "message": "Invalid date format."}), 400
             
             cur.execute(f"""UPDATE patient 
                             SET `{update_field}` = %s 
                             WHERE patient_id = %s
                         """, (new_value, patient_db_id))
             
-            # Format the response value for date_of_birth
+            # Format the date display (MM-DD-YYYY)
             if (update_field == 'date_of_birth' and new_value):
                 try:
                     date_obj = datetime.strptime(new_value, '%Y-%m-%d').date()
@@ -531,33 +516,19 @@ def update_patient_info():
                     
         # (Or) Update the Insurance table
         elif (update_field in ALLOWED_INSURANCE_FIELDS):
-            # Handle date format conversion for date_of_expiry
-            if (update_field == 'date_of_expiry' and new_value):
+            # Validate date_of_expiry (YYYY-MM-DD)
+            if (update_field == 'date_of_expiry'):
                 try:
-                    # Check if it's already in YYYY-MM-DD format
-                    if (len(new_value) == 10 and new_value.count('-') == 2):
-                        parts = new_value.split('-')
-                        if (len(parts[0]) == 4):  # YYYY-MM-DD format
-                            formatted_date = new_value
-                        else:  # MM-DD-YYYY format
-                            month, day, year = parts
-                            formatted_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-                    else:
-                        return jsonify({"success": False, "message": "Invalid date format. Use MM-DD-YYYY or YYYY-MM-DD."}), 400
-                    
-                    # Validate the date
-                    datetime.strptime(formatted_date, '%Y-%m-%d')
-                    new_value = formatted_date
-                    
+                    datetime.strptime(new_value, '%Y-%m-%d')
                 except ValueError:
-                    return jsonify({"success": False, "message": "Invalid date. Please use MM-DD-YYYY or YYYY-MM-DD format."}), 400
+                    return jsonify({"success": False, "message": "Invalid date format."}), 400
             
             cur.execute(f"""UPDATE insurance 
                             SET `{update_field}` = %s 
                             WHERE patient_id = %s
                         """, (new_value, patient_db_id))
             
-            # Format the response value for date_of_expiry
+            # Format the date display (MM-DD-YYYY)
             if (update_field == 'date_of_expiry' and new_value):
                 try:
                     date_obj = datetime.strptime(new_value, '%Y-%m-%d').date()

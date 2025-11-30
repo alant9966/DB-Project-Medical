@@ -74,7 +74,7 @@
                                     {{ patient.address or '' }}
                                 </span>
                                 <input type="text" class="edit-input" 
-                                    value="{{ patient.address }}" style="display: none;">
+                                    value="{{ patient.address or '' }}" style="display: none;">
                             </div>
                         </div>
                         <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
@@ -86,8 +86,8 @@
                                 <span class="display-value">
                                     {{ patient.date_of_birth.strftime('%m-%d-%Y') or '' }}
                                 </span>
-                                <input type="text" class="edit-input" 
-                                    value="{{ patient.date_of_birth.strftime('%m-%d-%Y') }}" style="display: none;">
+                                <input type="date" class="edit-input" 
+                                    value="{{ patient.date_of_birth.strftime('%Y-%m-%d') if patient.date_of_birth else '' }}" style="display: none;">
                             </div>
                         </div>
                         <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
@@ -144,15 +144,8 @@
                     <div class="info-row" data-patient-id="{{ patient.patient_id }}">
                         <div>
                             <div class="label">Member ID</div>
-                            <div class="edit-value" data-field="insurance_id">
-                                <span class="display-value">
-                                    {{ patient.insurance_id or '' }}
-                                </span>
-                                <input type="text" class="edit-input" 
-                                    value="{{ patient.insurance_id or '' }}" style="display: none;">
-                            </div>
+                            <div class="display-value">{{ patient.insurance_id or '' }}</div>
                         </div>
-                        <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>
                     </div>
                     <div class="info-row" data-patient-id="{{ patient.patient_id }}">
                         <div>
@@ -161,8 +154,8 @@
                                 <span class="display-value">
                                     {{ patient.date_of_expiry.strftime('%m-%d-%Y') if patient.date_of_expiry else '' }}
                                 </span>
-                                <input type="text" class="edit-input" 
-                                    value="{{ patient.date_of_expiry.strftime('%m-%d-%Y') if patient.date_of_expiry else '' }}" style="display: none;">
+                                <input type="date" class="edit-input" 
+                                    value="{{ patient.date_of_expiry.strftime('%Y-%m-%d') if patient.date_of_expiry else '' }}" style="display: none;">
                             </div>
                         </div>
                         <a href={{ url_for('update_patient_info') }} class="update-link">Update</a>

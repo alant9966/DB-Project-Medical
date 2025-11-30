@@ -31,13 +31,24 @@ document.addEventListener("DOMContentLoaded", function() {
                 // Cancel the input
                 const infoRow = this.closest('.info-row');
                 const displayValue = infoRow.querySelector('.display-value');
+                const editableValue = this.closest('.edit-value');
+                const fieldName = editableValue.dataset.field;
                 
                 // Swap (back) the visible element
                 this.style.display = 'none';
                 displayValue.style.display = 'inline-block';
                 
                 // Reset to the original input value
-                this.value = displayValue.textContent.trim();
+                if (this.type === 'date' && (fieldName === 'date_of_birth' || fieldName === 'date_of_expiry')) {
+                    const displayText = displayValue.textContent.trim();
+                    const dateParts = displayText.split('-');
+                    if (dateParts.length === 3 && dateParts[0].length === 2) {
+                        // MM-DD-YYYY format
+                        this.value = `${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`;
+                    }
+                } else {
+                    this.value = displayValue.textContent.trim();
+                }
             }
         });
     });
@@ -53,16 +64,7 @@ function saveData(inputElement) {
     let newValue = inputElement.value;
     const fieldName = editableValue.dataset.field;
     
-    // Convert MM-DD-YYYY format to YYYY-MM-DD for date fields
-    if (fieldName === 'date_of_birth' || fieldName === 'date_of_expiry') {
-        newValue = convertDateFormat(newValue);
-        if (!newValue) {
-            alert('Invalid date format. Please use MM-DD-YYYY format (e.g., 12-25-1990).');
-            return;
-        }
-    }
-    
-    // Determine if this is a patient or doctor page
+    // Determine if a patient or doctor is logged in
     const patientId = infoRow.dataset.patientId;
     const doctorId = infoRow.dataset.doctorId;
     
@@ -70,7 +72,7 @@ function saveData(inputElement) {
     let requestBody;
     
     if (patientId) {
-        // This is a patient page
+        // Patient
         updateUrl = '/patient/update';
         requestBody = {
             patient_id: patientId,
@@ -78,7 +80,7 @@ function saveData(inputElement) {
             value: newValue
         };
     } else if (doctorId) {
-        // This is a doctor page
+        // Doctor
         updateUrl = '/doctor/update';
         requestBody = {
             doctor_id: doctorId,
@@ -86,11 +88,11 @@ function saveData(inputElement) {
             value: newValue
         };
     } else {
-        alert('Error: Could not determine user type. Missing patient_id or doctor_id attribute.');
+        alert('Error: Could not determine logged-in user.');
         return;
     }
 
-    // Send data to Flask using the fetch API
+    // Send data to Flask
     fetch(updateUrl, {
         method: 'POST',
         headers: {
@@ -105,6 +107,15 @@ function saveData(inputElement) {
             const displayValue = infoRow.querySelector('.display-value');
             displayValue.textContent = data.new_value;
             
+            // Update date inputs to YYYY-MM-DD format
+            if (inputElement.type === 'date' && (fieldName === 'date_of_birth' || fieldName === 'date_of_expiry')) {
+                const dateParts = data.new_value.split('-');
+                if (dateParts.length === 3 && dateParts[0].length === 2) {
+                    const formattedDate = `${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`;
+                    inputElement.value = formattedDate;
+                }
+            }
+            
             // Swap (back) the visible element
             inputElement.style.display = 'none';
             displayValue.style.display = 'inline-block';
@@ -117,37 +128,4 @@ function saveData(inputElement) {
         console.error('Network error:', error);
         alert('A network error occurred. Please try again.');
     });
-}
-
-// Convert date from MM-DD-YYYY to YYYY-MM-DD format
-function convertDateFormat(dateString) {
-    if (!dateString || dateString.trim() === '') {
-        return null;
-    }
-    
-    // Check if already in YYYY-MM-DD format
-    const yyyyMMddPattern = /^\d{4}-\d{2}-\d{2}$/;
-    if (yyyyMMddPattern.test(dateString.trim())) {
-        return dateString.trim();
-    }
-    
-    // Try to parse MM-DD-YYYY format
-    const mmddyyyyPattern = /^(\d{1,2})-(\d{1,2})-(\d{4})$/;
-    const match = dateString.trim().match(mmddyyyyPattern);
-    
-    if (match) {
-        const month = match[1].padStart(2, '0');
-        const day = match[2].padStart(2, '0');
-        const year = match[3];
-        
-        // Validate the date
-        const date = new Date(`${year}-${month}-${day}`);
-        if (date.getFullYear() == year && 
-            (date.getMonth() + 1) == parseInt(month) && 
-            date.getDate() == parseInt(day)) {
-            return `${year}-${month}-${day}`;
-        }
-    }
-    
-    return null;
 }
