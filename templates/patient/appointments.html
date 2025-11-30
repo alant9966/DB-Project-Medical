@@ -96,26 +96,27 @@
                         <input type="text" id="searchInput" placeholder="Search Appointment Details">
                     </div>
                     <div class="appointment-list" id="appointmentList">
-                        <div class="appointment-item" data-search="annual physical examination">
-                            <div class="appointment-time">1:00 PM – 2:30 PM</div>
-                            <div class="appointment-desc">Annual Physical Examination</div>
-                        </div>
-                        <div class="appointment-item" data-search="follow-up consultation">
-                            <div class="appointment-time">6:00 PM – 7:00 PM</div>
-                            <div class="appointment-desc">Follow-up Consultation</div>
-                        </div>
-                        <div class="appointment-item" data-search="dental cleaning">
-                            <div class="appointment-time">9:00 AM – 10:00 AM</div>
-                            <div class="appointment-desc">Dental Cleaning</div>
-                        </div>
-                        <div class="appointment-item" data-search="blood work lab tests">
-                            <div class="appointment-time">2:00 PM – 2:45 PM</div>
-                            <div class="appointment-desc">Blood Work Lab Tests</div>
-                        </div>
-                        <div class="appointment-item" data-search="cardiology checkup">
-                            <div class="appointment-time">11:00 AM – 12:00 PM</div>
-                            <div class="appointment-desc">Cardiology Checkup</div>
-                        </div>
+                        {% if appointments %}
+                            {% for appointment in appointments %}
+                            <div class="appointment-item" data-search="{{ appointment.description }} {{ appointment.doctor_firstname }} {{ appointment.doctor_lastname }}">
+                                <div class="appointment-time">
+                                    {{ appointment.appointment_time.strftime('%I:%M %p') if appointment.appointment_time else 'N/A' }} ({{ appointment.duration_minutes }} min)
+                                </div>
+                                <div class="appointment-desc">
+                                    {{ appointment.description }}
+                                </div>
+                                <div class="appointment-details">
+                                    <span>{{ appointment.appointment_date.strftime('%b %d, %Y') if appointment.appointment_date else 'N/A' }}</span> •
+                                    <span>Dr. {{ appointment.doctor_firstname }} {{ appointment.doctor_lastname }}</span> •
+                                    <span>Room {{ appointment.room_id }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-appointments">
+                                <p>No appointments scheduled</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </section>

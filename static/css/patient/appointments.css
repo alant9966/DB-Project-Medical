@@ -349,6 +349,29 @@ body {
 .appointment-desc {
     font-size: 13px;
     color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.appointment-details {
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.appointment-details span {
+    white-space: nowrap;
+}
+
+.no-appointments {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+}
+
+.no-appointments p {
+    font-size: 14px;
 }
 
 .appointment-item.hidden {
