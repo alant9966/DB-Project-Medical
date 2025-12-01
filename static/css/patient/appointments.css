@@ -322,6 +322,32 @@ h1 {
     display: none;
 }
 
+.appointment-actions {
+    margin-top: 8px;
+}
+
+.cancel-appointment-btn {
+    padding: 6px 12px;
+    background-color: #dc2626;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.cancel-appointment-btn:hover:not(:disabled) {
+    background-color: #b91c1c;
+}
+
+.cancel-appointment-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .app-container {

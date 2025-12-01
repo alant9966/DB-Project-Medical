@@ -146,10 +146,11 @@ function displayAppointments(appointments) {
             const room = appt.room_id ? `Room ${appt.room_id}` : 'Room N/A';
             const description = appt.description || 'No description';
             const duration = appt.duration_minutes || 0;
+            const appointmentId = appt.appointment_id || appt.id;
             const searchText = `${description} ${appt.doctor_firstname || ''} ${appt.doctor_lastname || ''}`.toLowerCase();
             
             return `
-                <div class="appointment-item" data-search="${searchText}">
+                <div class="appointment-item" data-search="${searchText}" data-appointment-id="${appointmentId}">
                     <div class="appointment-time">
                         ${time} (${duration} min)
                     </div>
@@ -161,11 +162,17 @@ function displayAppointments(appointments) {
                         <span>${doctorName}</span> •
                         <span>${room}</span>
                     </div>
+                    <div class="appointment-actions">
+                        <button class="cancel-appointment-btn" data-appointment-id="${appointmentId}">
+                            Cancel Appointment
+                        </button>
+                    </div>
                 </div>
             `;
         }).join('');
     }
     initializeSearch();
+    initializeCancelButtons();
 }
 
 // Initialize search functionality
@@ -187,6 +194,63 @@ function initializeSearch() {
                 item.classList.remove('hidden');
             } else {
                 item.classList.add('hidden');
+            }
+        });
+    });
+}
+
+// Initialize cancel appointment buttons
+function initializeCancelButtons() {
+    const cancelButtons = document.querySelectorAll('.cancel-appointment-btn');
+    
+    cancelButtons.forEach(button => {
+        // Remove existing event listeners by cloning
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const appointmentId = newButton.getAttribute('data-appointment-id');
+            
+            if (!appointmentId) {
+                console.error('Appointment ID not found');
+                return;
+            }
+            
+            // Confirm cancellation
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+            
+            // Disable button during request
+            newButton.disabled = true;
+            newButton.textContent = 'Cancelling...';
+            
+            try {
+                const response = await fetch('/patient/appointments/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ appointment_id: appointmentId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Refresh the appointment list for the currently selected date
+                    const selectedDate = formatDate(selectedYear, selectedMonth, selectedDay);
+                    await fetchAppointmentsForDate(selectedDate);
+                } else {
+                    alert('Error cancelling appointment: ' + (data.message || 'Unknown error'));
+                    newButton.disabled = false;
+                    newButton.textContent = 'Cancel Appointment';
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error cancelling appointment. Please try again.');
+                newButton.disabled = false;
+                newButton.textContent = 'Cancel Appointment';
             }
         });
     });

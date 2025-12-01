@@ -698,6 +698,66 @@ def patient_appointments_by_date():
         cur.close()
 
 
+# Route for canceling an appointment
+@app.route('/patient/appointments/cancel', methods=['POST'])
+@login_required
+def cancel_appointment():
+    # Check that the user is a patient
+    if (current_user.role != 'patient'):
+        abort(403)
+    
+    data = request.json
+    appointment_id = data.get('appointment_id')
+    
+    if not appointment_id:
+        return jsonify({"success": False, "message": "Appointment ID is required"}), 400
+    
+    cur = mysql.connection.cursor()
+    try:
+        # Get patient_id for the logged-in user
+        cur.execute("""SELECT patient_id
+                       FROM patient
+                       WHERE user_id = %s
+                    """, (current_user.id,))
+        patient = cur.fetchone()
+        
+        if (not patient):
+            return jsonify({"success": False, "message": "Patient not found"}), 404
+        
+        patient_id = patient['patient_id']
+        
+        # Verify that the appointment belongs to this patient
+        cur.execute("""SELECT appointment_id, appointment_date
+                       FROM appointment
+                       WHERE appointment_id = %s
+                           AND patient_id = %s
+                    """, (appointment_id, patient_id))
+        appointment = cur.fetchone()
+        
+        if (not appointment):
+            return jsonify({"success": False, "message": "Appointment not found or does not belong to this patient"}), 404
+        
+        # Delete the appointment
+        cur.execute("""DELETE FROM appointment
+                       WHERE appointment_id = %s
+                           AND patient_id = %s
+                    """, (appointment_id, patient_id))
+        
+        mysql.connection.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Appointment cancelled successfully"
+        })
+        
+    except Exception as e:
+        mysql.connection.rollback()
+        return jsonify({"success": False, "message": f"Error: {e}"}), 500
+    
+    finally:
+        cur.close()
+
+
 # Route for Doctor Homepage
 @app.route('/doctor/home')
 @login_required
@@ -1178,6 +1238,18 @@ def patient_medical_record():
         
         # Retrieve the most recent medical record for display
         medical_record = medical_records[0] if medical_records else None
+        
+        # Retrieve the most recent blood test date
+        cur.execute("""SELECT MAX(time) as last_bloodtest_date
+                       FROM bloodtest
+                       WHERE patient_id = %s
+                    """, (patient_id,))
+        bloodtest_result = cur.fetchone()
+        last_bloodtest_date = bloodtest_result['last_bloodtest_date'] if bloodtest_result and bloodtest_result['last_bloodtest_date'] else None
+        
+        # Add the most recent blood test date to the medical record dictionary
+        if medical_record:
+            medical_record['last_bloodtest_date'] = last_bloodtest_date
         
     except Exception as e:
         flash(f'An error occurred: {e}', 'error')

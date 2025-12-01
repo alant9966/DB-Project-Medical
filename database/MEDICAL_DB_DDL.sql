@@ -30,7 +30,7 @@ CREATE TABLE patient (
 CREATE TABLE bloodtest(
     bloodtest_id INT AUTO_INCREMENT,
     patient_id INT,
-    time TIME, 
+    time DATE, 
     result VARCHAR(500), 
     PRIMARY KEY (bloodtest_id),
     FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
@@ -144,16 +144,16 @@ VALUES
 -- Populate the BloodTest table
 INSERT INTO bloodtest(bloodtest_id, patient_id, time, result)
 VALUE
-(1, 1, '08:30:00', 'Normal hemoglobin and glucose levels'),
-(2, 2, '09:15:00', 'Slightly elevated cholesterol; HDL within range'),
-(3, 3, '10:00:00', 'Low iron level; recommended dietary supplements'),
-(4, 4, '11:20:00', 'White blood cell count elevated—possible infection'),
-(5, 5, '13:45:00', 'All values within normal range'),
-(6, 6, '14:10:00', 'High fasting glucose—monitor for diabetes'),
-(7, 7, '15:30:00', 'Mild anemia detected'),
-(8, 8, '16:00:00', 'Elevated liver enzymes—further testing recommended'),
-(9, 9, '08:10:00', 'Vitamin D deficiency'),
-(10, 10, '09:40:00', 'Normal profile; no abnormalities detected');
+(1, 1, '2025-10-15', 'Normal hemoglobin and glucose levels'),
+(2, 2, '2025-10-20', 'Slightly elevated cholesterol; HDL within range'),
+(3, 3, '2025-10-18', 'Low iron level; recommended dietary supplements'),
+(4, 4, '2025-10-22', 'White blood cell count elevated—possible infection'),
+(5, 5, '2025-10-25', 'All values within normal range'),
+(6, 6, '2025-10-28', 'High fasting glucose—monitor for diabetes'),
+(7, 7, '2025-10-19', 'Mild anemia detected'),
+(8, 8, '2025-10-21', 'Elevated liver enzymes—further testing recommended'),
+(9, 9, '2025-10-17', 'Vitamin D deficiency'),
+(10, 10, '2025-10-24', 'Normal profile; no abnormalities detected');
 
 -- Populate the MedicalRecord table
 INSERT INTO medicalrecord (medicalrecord_id, patient_id, diagnosis, result)

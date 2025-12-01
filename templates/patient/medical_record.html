@@ -71,6 +71,10 @@
                         <div class="label">Result</div>
                         <div class="value">{{ medical_record.result }}</div>
                     </div>
+                    <div class="info-row">
+                        <div class="label">Last Blood Test</div>
+                        <div class="value">{{ medical_record.last_bloodtest_date or 'N/A' }}</div>
+                    </div>
                 </div>
             </section>
         </main>
