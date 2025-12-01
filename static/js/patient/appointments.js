@@ -80,7 +80,7 @@ function formatDate(year, month, day) {
 function formatTime(timeStr) {
     if (!timeStr) return 'N/A';
     try {
-        // Handle both "HH:MM:SS" and "HH:MM" formats
+        // Handle both time formats (HH:MM:SS and HH:MM)
         const parts = timeStr.split(':');
         const hours = parseInt(parts[0]);
         const minutes = parseInt(parts[1]);
@@ -204,7 +204,7 @@ function initializeCancelButtons() {
     const cancelButtons = document.querySelectorAll('.cancel-appointment-btn');
     
     cancelButtons.forEach(button => {
-        // Remove existing event listeners by cloning
+        // Remove existing event listeners
         const newButton = button.cloneNode(true);
         button.parentNode.replaceChild(newButton, button);
         
@@ -276,7 +276,6 @@ document.querySelector('.next-month').addEventListener('click', () => {
     }
     renderCalendar();
     updateYear();
-    // Don't update current date display when navigating months - keep showing selected date
 });
 
 // Initialize search functionality

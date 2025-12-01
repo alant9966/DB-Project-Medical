@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
     }
     
-    // Store the original appointments HTML for resetting
+    // Store the original appointment's HTML for resetting
     const originalAppointmentsHTML = appointmentsList.innerHTML;
     
-    // Handle Enter key press in search input
+    // Handle pressing the Enter key
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
             performSearch(this.value);
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function formatTime(timeString) {
         if (!timeString) return '';
         
-        // Parse time string (format: HH:MM:SS or HH:MM)
+        // Parse time string (HH:MM:SS or HH:MM)
         const parts = timeString.split(':');
         const hours = parseInt(parts[0], 10);
         const minutes = parts[1];
