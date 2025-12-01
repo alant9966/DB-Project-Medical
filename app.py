@@ -1260,6 +1260,6 @@ def patient_medical_record():
         cur.close()
     
     return render_template('patient/medical_record.html',
-                         medical_record=medical_record,
-                         medical_records=medical_records,
-                         search_query=search_query) 
+                        medical_record=medical_record,
+                        medical_records=medical_records,
+                        search_query=search_query) 

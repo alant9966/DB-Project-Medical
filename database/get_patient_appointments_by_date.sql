@@ -1,3 +1,0 @@
-DELIMITER $$
-
-DELIMITER ;

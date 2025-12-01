@@ -1,15 +1,15 @@
 CREATE USER IF NOT EXISTS 'medical_app_user'@'localhost'
-IDENTIFIED BY 'secure_app_password_2024';
+IDENTIFIED BY 'aws.cs3083!user';
 
 -- Create a read-only reporting user (for analytics/reports)
--- This user can only SELECT data, no modifications
+-- Can only SELECT data (no modifications)
 CREATE USER IF NOT EXISTS 'medical_readonly_user'@'localhost'
-IDENTIFIED BY 'readonly_password_2024';
+IDENTIFIED BY 'aws.cs3083!readonly';
 
 -- Create a backup user (for database backups)
--- This user can only read data for backup purposes
+-- Can only read data
 CREATE USER IF NOT EXISTS 'medical_backup_user'@'localhost'
-IDENTIFIED BY 'backup_password_2024';
+IDENTIFIED BY 'aws.cs3083!backup';
 
 
 -- Grant SELECT permission (read data)
@@ -35,22 +35,26 @@ GRANT INSERT ON medical_db.prescription TO 'medical_app_user'@'localhost';
 GRANT INSERT ON medical_db.insurance TO 'medical_app_user'@'localhost';
 
 -- Grant UPDATE permission (modify existing records)
--- Patients/doctors can update their profiles, appointments can be modified
+-- Patients/doctors can update their profiles and modify appointments
 GRANT UPDATE ON medical_db.User TO 'medical_app_user'@'localhost';
 GRANT UPDATE ON medical_db.patient TO 'medical_app_user'@'localhost';
 GRANT UPDATE ON medical_db.doctor TO 'medical_app_user'@'localhost';
 GRANT UPDATE ON medical_db.appointment TO 'medical_app_user'@'localhost';
 GRANT UPDATE ON medical_db.insurance TO 'medical_app_user'@'localhost';
 GRANT UPDATE ON medical_db.medicalrecord TO 'medical_app_user'@'localhost';
+GRANT UPDATE ON medical_db.prescription TO 'medical_app_user'@'localhost';
 
 -- Grant DELETE permission (remove records)
--- Allows deletion of appointments and user accounts (CASCADE handles related records)
+-- Allows deletion of appointments and user accounts
 GRANT DELETE ON medical_db.appointment TO 'medical_app_user'@'localhost';
 GRANT DELETE ON medical_db.User TO 'medical_app_user'@'localhost';
 
+-- Grant EXECUTE permission (call stored procedures)
+GRANT EXECUTE ON PROCEDURE medical_db.search_appointment TO 'medical_app_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE medical_db.get_patient_appointments_by_date TO 'medical_app_user'@'localhost';
 
--- This user can ONLY read data (for reports, analytics)
--- NO INSERT, UPDATE, or DELETE permissions
+
+-- Read-only user can only read data (for reports and analytics)
 GRANT SELECT ON medical_db.* TO 'medical_readonly_user'@'localhost';
 
 -- Backup user needs SELECT, SHOW VIEW, LOCK TABLES, and RELOAD
