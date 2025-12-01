@@ -14,7 +14,7 @@ instance/
 .webassets-cache
 
 # Sensitive configuration
-config.py
+# config.py
 
 # IDE
 .vscode/
