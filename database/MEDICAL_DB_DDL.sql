@@ -321,4 +321,27 @@ BEGIN
     ORDER BY a.appointment_date ASC, a.appointment_time ASC;
 END$$
 
+DROP PROCEDURE IF EXISTS get_patient_appointments_by_date$$
+
+CREATE PROCEDURE get_patient_appointments_by_date(IN p_patient_id INT, IN p_date DATE)
+BEGIN
+    SELECT
+        a.appointment_id,
+        a.patient_id,
+        a.doctor_id,
+        a.appointment_date,
+        a.appointment_time,
+        a.duration_minutes,
+        a.description,
+        d.doctor_firstname,
+        d.doctor_lastname,
+        r.room_id
+    FROM appointment a
+    LEFT JOIN doctor d ON d.doctor_id = a.doctor_id
+    LEFT JOIN room r ON r.room_id = a.room_id
+    WHERE a.patient_id = p_patient_id
+        AND a.appointment_date = p_date
+    ORDER BY a.appointment_time ASC;
+END$$
+
 DELIMITER ;

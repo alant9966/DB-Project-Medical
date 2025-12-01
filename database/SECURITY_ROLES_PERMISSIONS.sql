@@ -44,8 +44,7 @@ GRANT UPDATE ON medical_db.insurance TO 'medical_app_user'@'localhost';
 GRANT UPDATE ON medical_db.medicalrecord TO 'medical_app_user'@'localhost';
 
 -- Grant DELETE permission (remove records)
--- Note: Be careful with DELETE - medical records should often be kept for legal reasons
--- For now, allowing deletion of appointments and user accounts (CASCADE handles related records)
+-- Allows deletion of appointments and user accounts (CASCADE handles related records)
 GRANT DELETE ON medical_db.appointment TO 'medical_app_user'@'localhost';
 GRANT DELETE ON medical_db.User TO 'medical_app_user'@'localhost';
 

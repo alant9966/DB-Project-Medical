@@ -1,7 +1,10 @@
 // Calendar functionality
-let currentMonth = 9; // October (0-indexed)
-let currentYear = 2025;
-let selectedDay = 11;
+const today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+let selectedDay = today.getDate();
+let selectedMonth = today.getMonth();
+let selectedYear = today.getFullYear();
 
 function renderCalendar() {
     const calendarDays = document.getElementById('calendarDays');
@@ -24,7 +27,8 @@ function renderCalendar() {
         dayElement.className = 'calendar-day';
         dayElement.textContent = day;
 
-        if (day === selectedDay && currentMonth === 9 && currentYear === 2025) {
+        // Check if the day is selected
+        if (day === selectedDay && currentMonth === selectedMonth && currentYear === selectedYear) {
             dayElement.classList.add('selected');
         }
 
@@ -33,10 +37,17 @@ function renderCalendar() {
             document.querySelectorAll('.calendar-day').forEach(d => {
                 d.classList.remove('selected');
             });
+
             // Add selection to clicked day
             dayElement.classList.add('selected');
             selectedDay = day;
+            selectedMonth = currentMonth;
+            selectedYear = currentYear;
             updateCurrentDate();
+
+            // Fetch appointments for the selected date
+            const selectedDate = formatDate(selectedYear, selectedMonth, selectedDay);
+            fetchAppointmentsForDate(selectedDate);
         });
 
         calendarDays.appendChild(dayElement);
@@ -46,12 +57,139 @@ function renderCalendar() {
 function updateCurrentDate() {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentDateElement = document.querySelector('.current-date');
-    currentDateElement.textContent = `${months[currentMonth]} ${selectedDay}`;
+    if (currentDateElement) {
+        currentDateElement.textContent = `${months[selectedMonth]} ${selectedDay}`;
+    }
 }
 
 function updateYear() {
     const yearElement = document.querySelector('.year');
-    yearElement.textContent = currentYear;
+    if (yearElement) {
+        yearElement.textContent = currentYear;
+    }
+}
+
+// Format date as YYYY-MM-DD
+function formatDate(year, month, day) {
+    const monthStr = String(month + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    return `${year}-${monthStr}-${dayStr}`;
+}
+
+// Format time for display
+function formatTime(timeStr) {
+    if (!timeStr) return 'N/A';
+    try {
+        // Handle both "HH:MM:SS" and "HH:MM" formats
+        const parts = timeStr.split(':');
+        const hours = parseInt(parts[0]);
+        const minutes = parseInt(parts[1]);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        const displayMinutes = String(minutes).padStart(2, '0');
+        return `${displayHours}:${displayMinutes} ${period}`;
+    } catch (e) {
+        return timeStr;
+    }
+}
+
+// Format date for display
+function formatDateDisplay(dateStr) {
+    if (!dateStr) return 'N/A';
+    try {
+        const date = new Date(dateStr + 'T00:00:00');
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    } catch (e) {
+        return dateStr;
+    }
+}
+
+// Fetch appointments for selected date
+async function fetchAppointmentsForDate(date) {
+    try {
+        const response = await fetch('/patient/appointments-by-date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ date: date })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            displayAppointments(data.appointments);
+        } else {
+            console.error('Error fetching appointments:', data.message);
+            displayAppointments([]);
+        }
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        displayAppointments([]);
+    }
+}
+
+// Display appointments in the list
+function displayAppointments(appointments) {
+    const appointmentList = document.getElementById('appointmentList');
+    
+    if (!appointmentList) return;
+    
+    if (appointments.length === 0) {
+        appointmentList.innerHTML = '<div class="no-appointments"><p>No appointments scheduled</p></div>';
+    } else {
+        appointmentList.innerHTML = appointments.map(appt => {
+            const time = formatTime(appt.appointment_time);
+            const date = formatDateDisplay(appt.appointment_date);
+            const doctorName = `Dr. ${appt.doctor_firstname || ''} ${appt.doctor_lastname || ''}`.trim();
+            const room = appt.room_id ? `Room ${appt.room_id}` : 'Room N/A';
+            const description = appt.description || 'No description';
+            const duration = appt.duration_minutes || 0;
+            const searchText = `${description} ${appt.doctor_firstname || ''} ${appt.doctor_lastname || ''}`.toLowerCase();
+            
+            return `
+                <div class="appointment-item" data-search="${searchText}">
+                    <div class="appointment-time">
+                        ${time} (${duration} min)
+                    </div>
+                    <div class="appointment-desc">
+                        ${description}
+                    </div>
+                    <div class="appointment-details">
+                        <span>${date}</span> •
+                        <span>${doctorName}</span> •
+                        <span>${room}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    initializeSearch();
+}
+
+// Initialize search functionality
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    
+    // Remove existing event listener
+    const newSearchInput = searchInput.cloneNode(true);
+    searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+    
+    newSearchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const appointmentItems = document.querySelectorAll('.appointment-item');
+        
+        appointmentItems.forEach(item => {
+            const searchText = item.getAttribute('data-search');
+            if (searchText && searchText.includes(searchTerm)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    });
 }
 
 // Previous month button
@@ -63,7 +201,6 @@ document.querySelector('.prev-month').addEventListener('click', () => {
     }
     renderCalendar();
     updateYear();
-    updateCurrentDate();
 });
 
 // Next month button
@@ -75,51 +212,16 @@ document.querySelector('.next-month').addEventListener('click', () => {
     }
     renderCalendar();
     updateYear();
-    updateCurrentDate();
+    // Don't update current date display when navigating months - keep showing selected date
 });
 
-// Calendar action buttons
-document.querySelector('.cancel-btn').addEventListener('click', () => {
-    // Reset to default selection
-    currentMonth = 9;
-    currentYear = 2025;
-    selectedDay = 11;
-    renderCalendar();
-    updateYear();
-    updateCurrentDate();
-});
-
-document.querySelector('.ok-btn').addEventListener('click', () => {
-    alert(`Date selected: ${currentMonth + 1}/${selectedDay}/${currentYear}`);
-});
-
-// Search functionality
-const searchInput = document.getElementById('searchInput');
-const appointmentItems = document.querySelectorAll('.appointment-item');
-
-searchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-
-    appointmentItems.forEach(item => {
-        const searchText = item.getAttribute('data-search');
-        if (searchText.includes(searchTerm)) {
-            item.classList.remove('hidden');
-        } else {
-            item.classList.add('hidden');
-        }
-    });
-});
-
-// Insurance update links
-const updateLinks = document.querySelectorAll('.update-link');
-
-updateLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const fieldName = link.getAttribute('data-field');
-        alert(`Update ${fieldName} - This would open a form to update the information.`);
-    });
-});
+// Initialize search functionality
+initializeSearch();
 
 // Initialize calendar on page load
 renderCalendar();
+updateYear();
+updateCurrentDate();
+
+// Fetch appointments for current date on page load
+fetchAppointmentsForDate(formatDate(currentYear, currentMonth, selectedDay));

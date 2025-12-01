@@ -585,7 +585,27 @@ def patient_appointments():
                        WHERE a.patient_id = %s
                        ORDER BY a.appointment_date DESC, a.appointment_time DESC
                     """, (patient_id,))
-        appointments = cur.fetchall()
+        appointments_raw = cur.fetchall()
+        
+        # Convert timedelta objects to time objects for appointment_time
+        appointments = []
+        for appt in appointments_raw:
+            if (hasattr(appt, 'keys')):
+                appt_dict = dict(appt)
+            else:
+                appt_dict = appt
+            
+            if (appt_dict.get('appointment_time')):
+                appt_time = appt_dict['appointment_time']
+                if (isinstance(appt_time, timedelta)):
+                    # Convert timedelta to time
+                    total_seconds = int(appt_time.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    appt_dict['appointment_time'] = dt_time(hours, minutes, seconds)
+            
+            appointments.append(appt_dict)
         
     except Exception as e:
         flash(f'An error occurred: {e}', 'error')
@@ -597,6 +617,85 @@ def patient_appointments():
     return render_template('patient/appointments.html', 
                          patient=patient, 
                          appointments=appointments)
+
+
+# Route for fetching patient appointments by date
+@app.route('/patient/appointments-by-date', methods=['POST'])
+@login_required
+def patient_appointments_by_date():
+    # Check that the user is a patient
+    if (current_user.role != 'patient'):
+        abort(403)
+    
+    data = request.json
+    selected_date = data.get('date', '').strip()
+    
+    if not selected_date:
+        return jsonify({"success": False, "message": "Date is required"}), 400
+    
+    cur = mysql.connection.cursor()
+    try:
+        # Get patient_id for the logged-in user
+        cur.execute("""SELECT patient_id
+                       FROM patient
+                       WHERE user_id = %s
+                    """, (current_user.id,))
+        patient = cur.fetchone()
+        
+        if (not patient):
+            return jsonify({"success": False, "message": "Patient not found"}), 404
+        
+        patient_id = patient['patient_id']
+        
+        # Parse the date (YYYY-MM-DD)
+        try:
+            date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({"success": False, "message": "Invalid date format. Please use YYYY-MM-DD"}), 400
+        
+        # Fetch appointments for the selected date (using stored procedure)
+        cur.execute("""CALL get_patient_appointments_by_date(%s, %s)""", (patient_id, date_obj))
+        appointments_raw = cur.fetchall()
+        
+        # Convert timedelta objects to time objects for appointment_time
+        appointments_list = []
+        for appt in appointments_raw:
+            if (hasattr(appt, 'keys')):
+                appt_dict = dict(appt)
+            else:
+                appt_dict = appt
+            
+            if (appt_dict.get('appointment_time')):
+                appt_time = appt_dict['appointment_time']
+                if (isinstance(appt_time, timedelta)):
+                    # Convert timedelta to time
+                    total_seconds = int(appt_time.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    appt_dict['appointment_time'] = dt_time(hours, minutes, seconds)
+            
+            # Convert date and time to strings for JSON
+            if (appt_dict.get('appointment_date')):
+                appt_dict['appointment_date'] = appt_dict['appointment_date'].strftime('%Y-%m-%d')
+            if (appt_dict.get('appointment_time')):
+                if (isinstance(appt_dict['appointment_time'], str)):
+                    appt_dict['appointment_time'] = appt_dict['appointment_time']
+                else:
+                    appt_dict['appointment_time'] = appt_dict['appointment_time'].strftime('%H:%M:%S')
+            
+            appointments_list.append(appt_dict)
+        
+        return jsonify({
+            "success": True,
+            "appointments": appointments_list
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error: {e}"}), 500
+    
+    finally:
+        cur.close()
 
 
 # Route for Doctor Homepage
@@ -779,7 +878,7 @@ def doctor_appointments(appointment_id=None):
                          patient=patient)
 
 
-# Route to fetch appointment and patient details
+# Route to fetch doctor appointments and patient details
 @app.route('/doctor/appointments/<int:appointment_id>/details', methods=['GET'])
 @login_required
 def get_appointment_details(appointment_id):
@@ -963,7 +1062,7 @@ def patient_treatments(prescription_id=None):
                          prescriptions=prescriptions)
 
 
-# Route for Patient Pay Bill
+# Route for paying a patient's bill
 @app.route('/patient/treatments/<int:prescription_id>/pay', methods=['POST'])
 @login_required
 def patient_pay_bill(prescription_id):

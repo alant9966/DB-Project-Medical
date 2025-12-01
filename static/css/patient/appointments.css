@@ -11,128 +11,97 @@ body {
     color: #111827;
 }
 
-.app-container {
+.homepage-container {
     display: flex;
     min-height: 100vh;
 }
 
-/* Left sidebar */
-.sidebar {
-    width: 220px;
-    background-color: #f0f2f6;
-    padding: 24px 0;
-    flex-shrink: 0;
-}
-
-.logo {
-    padding: 0 20px 32px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.nav-menu {
+/* Header Bar */
+.header-bar {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: sans-serif;
 }
 
-.nav-item {
+.header-bar .header-left {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    position: relative;
+    gap: 15px;
 }
 
-.nav-item:hover {
-    background-color: #e5e7eb;
+.header-bar .logo {
+    font-weight: bold;
+    font-size: 1.2em;
 }
 
-.nav-item.active {
+.header-bar .logout-button {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: none;
+    background-color: #1f7aec;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.header-bar .logout-button:hover {
+    background-color: #1561c0;
+}
+
+/* Sidebar (Navigation) */
+.sidebar {
+    width: 240px;
     background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-.nav-item.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: #3b82f6;
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
-.nav-icon {
+.sidebar nav li {
+    margin-bottom: 20px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.1em;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.sidebar-nav a:hover {
+    background-color: #f0f4f8;
+}
+
+.sidebar-nav a.active {
+    background-color: #f0f4f8;
+    color: #1f7aec;
+    font-weight: 600;
+}
+
+.sidebar-nav a i {
     width: 20px;
-    height: 20px;
-    background-color: #9ca3af;
-    border-radius: 4px;
-    margin-right: 12px;
-}
-
-.nav-item.active .nav-icon {
-    background-color: #3b82f6;
+    text-align: center;
 }
 
 /* Main content */
 .main-content {
-    flex: 1;
-    max-width: 1300px;
-    padding: 0 32px 32px;
-}
-
-/* Top nav */
-.top-nav {
-    background-color: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    margin: 0 -32px 24px;
-}
-
-.nav-links {
-    display: flex;
-    gap: 24px;
-}
-
-.nav-links a {
-    color: #3b82f6;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.nav-links a:hover {
-    text-decoration: underline;
-}
-
-.nav-icons {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.icon-circle {
-    border-radius: 50%;
-}
-
-.small-filled {
-    width: 8px;
-    height: 8px;
-    background-color: #3b82f6;
-}
-
-.large-hollow {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #6b7280;
-}
-
-.icon-more {
-    font-size: 20px;
-    color: #6b7280;
-    cursor: pointer;
-    line-height: 1;
+    flex-grow: 1;
+    padding: 20px 40px;
 }
 
 /* Greeting */
@@ -140,9 +109,9 @@ body {
     margin-bottom: 24px;
 }
 
-.greeting h1 {
-    font-size: 24px;
-    font-weight: 600;
+h1 {
+    font-size: 2em;
+    margin-top: 0;
 }
 
 /* Appointments section */
@@ -251,31 +220,6 @@ body {
 
 .calendar-day.empty {
     cursor: default;
-}
-
-.calendar-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    margin-top: 16px;
-}
-
-.cancel-btn,
-.ok-btn {
-    background: none;
-    border: none;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 4px 8px;
-}
-
-.cancel-btn {
-    color: #6b7280;
-}
-
-.ok-btn {
-    color: #3b82f6;
 }
 
 /* Appointment list */
