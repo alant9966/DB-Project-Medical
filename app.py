@@ -709,7 +709,7 @@ def cancel_appointment():
     data = request.json
     appointment_id = data.get('appointment_id')
     
-    if not appointment_id:
+    if (not appointment_id):
         return jsonify({"success": False, "message": "Appointment ID is required"}), 400
     
     cur = mysql.connection.cursor()
@@ -1092,23 +1092,6 @@ def patient_treatments(prescription_id=None):
                         """, (patient_id,))
             treatment = cur.fetchone()
         
-        # Fetch all prescriptions for the patient (for potential list view)
-        cur.execute("""SELECT p.prescription_id as id,
-                              t.treatment_name as name,
-                              t.duration_days as duration,
-                              t.description,
-                              CASE WHEN p.paid = TRUE THEN 0 ELSE t.bill END as total_amount,
-                              p.prescribed_on,
-                              p.notes,
-                              p.paid
-                       FROM prescription p
-                       JOIN treatment t ON p.treatment_name = t.treatment_name 
-                           AND p.duration_days = t.duration_days
-                       WHERE p.patient_id = %s
-                       ORDER BY p.prescribed_on DESC, p.prescription_id DESC
-                    """, (patient_id,))
-        prescriptions = cur.fetchall()
-        
     except Exception as e:
         flash(f'An error occurred: {e}', 'error')
         treatment = None
@@ -1118,8 +1101,7 @@ def patient_treatments(prescription_id=None):
         cur.close()
     
     return render_template('patient/treatments.html',
-                         treatment=treatment,
-                         prescriptions=prescriptions)
+                         treatment=treatment)
 
 
 # Route for paying a patient's bill
@@ -1194,9 +1176,6 @@ def patient_medical_record():
     if (current_user.role != 'patient'):
         abort(403)
     
-    # Get search query parameter
-    search_query = request.args.get('q', '').strip()
-    
     cur = mysql.connection.cursor()
     try:
         # Get patient_id for the logged-in user
@@ -1211,29 +1190,15 @@ def patient_medical_record():
         
         patient_id = patient['patient_id']
         
-        # Fetch medical records for this patient
-        if (search_query):
-            # Search in diagnosis and result fields
-            cur.execute("""SELECT medicalrecord_id as record_id,
-                                  patient_id as account_id,
-                                  diagnosis as diagnoses,
-                                  result
-                           FROM medicalrecord
-                           WHERE patient_id = %s
-                               AND (diagnosis LIKE %s OR result LIKE %s)
-                           ORDER BY medicalrecord_id DESC
-                        """, (patient_id, f'%{search_query}%', f'%{search_query}%'))
-        else:
-            # Fetch all medical records
-            cur.execute("""SELECT medicalrecord_id as record_id,
-                                  patient_id as account_id,
-                                  diagnosis as diagnoses,
-                                  result
-                           FROM medicalrecord
-                           WHERE patient_id = %s
-                           ORDER BY medicalrecord_id DESC
-                        """, (patient_id,))
-        
+        # Fetch all medical records
+        cur.execute("""SELECT medicalrecord_id as record_id,
+                                patient_id as account_id,
+                                diagnosis as diagnoses,
+                                result
+                        FROM medicalrecord
+                        WHERE patient_id = %s
+                        ORDER BY medicalrecord_id DESC
+                    """, (patient_id,))
         medical_records = cur.fetchall()
         
         # Retrieve the most recent medical record for display
@@ -1261,5 +1226,4 @@ def patient_medical_record():
     
     return render_template('patient/medical_record.html',
                         medical_record=medical_record,
-                        medical_records=medical_records,
-                        search_query=search_query) 
+                        medical_records=medical_records) 
